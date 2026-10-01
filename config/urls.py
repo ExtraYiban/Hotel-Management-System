@@ -19,11 +19,18 @@ URL configuration for config project.
 """
 from django.contrib import admin
 from django.urls import path, include  # <-- 1. Tambahkan include di sini
+from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from dashboard.views import DashboardView
+from rooms.views import RoomDetailView, RoomListView
 
 urlpatterns = [
+    path('', DashboardView.as_view(), name='home'),
     path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
+    path('rooms/', RoomListView.as_view(), name='room_list'),
+    path('rooms/<int:room_id>/', RoomDetailView.as_view(), name='room_detail'),
     path('reservations/', include('reservations.urls')),
 ]
 

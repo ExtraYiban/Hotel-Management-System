@@ -1,0 +1,7 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Daftar{% endblock %}
+{% block content %}
+<p class="eyebrow">Mulai perjalanan Anda <span></span></p><h1>Buat akun tamu</h1><p class="auth-subtitle">Simpan reservasi, dapatkan layanan yang lebih personal, dan nikmati Nocturn Haven dengan tenang.</p>
+<form method="post" class="auth-form">{% csrf_token %}{% if form.non_field_errors %}<div class="auth-error">Periksa kembali data yang Anda masukkan.</div>{% endif %}<label>Nama lengkap{{ form.full_name }}{% if form.full_name.errors %}<small>{{ form.full_name.errors|striptags }}</small>{% endif %}</label><label>Email{{ form.email }}{% if form.email.errors %}<small>{{ form.email.errors|striptags }}</small>{% endif %}</label><label>Nomor telepon{{ form.phone_number }}{% if form.phone_number.errors %}<small>{{ form.phone_number.errors|striptags }}</small>{% endif %}</label><label>Password{{ form.password1 }}{% if form.password1.errors %}<small>{{ form.password1.errors|striptags }}</small>{% endif %}</label><label>Ulangi password{{ form.password2 }}{% if form.password2.errors %}<small>{{ form.password2.errors|striptags }}</small>{% endif %}</label><button class="button btn btn-danger button-dark" type="submit">Buat Akun <span>→</span></button></form>
+<p class="auth-switch">Sudah memiliki akun? <a href="{% url 'login' %}">Masuk di sini</a></p>
+{% endblock %}
