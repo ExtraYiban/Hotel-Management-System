@@ -1,0 +1,16 @@
+{% extends 'reservations/base.html' %}
+{% block title %}Pembayaran Reservasi{% endblock %}
+{% block content %}
+<section class="page-intro"><div><h1>Selesaikan pembayaran</h1><p>Amankan kamar Anda dengan mengunggah bukti pembayaran.</p></div><span class="step-label">03 <i></i> 03</span></section>
+<div class="reservation-layout">
+    <form class="form-card" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-heading"><span class="form-icon">03</span><div><h2>Konfirmasi pembayaran</h2><p>Pesanan NH-{{ view.kwargs.booking_id|stringformat:'04d' }} menunggu verifikasi.</p></div></div>
+        <label class="field"><span>Metode pembayaran</span>{{ form.metode_pembayaran }}{% if form.metode_pembayaran.errors %}<small class="error-text">{{ form.metode_pembayaran.errors|striptags }}</small>{% endif %}</label>
+        <label class="upload-field"><span>Bukti transfer</span>{{ form.bukti_transfer_url }}<strong>Pilih file bukti pembayaran</strong><small>Format JPG atau PNG, maksimal 5 MB.</small></label>
+        <div class="secure-note"><strong>Transaksi terlindungi</strong><span>Tim kami akan memverifikasi pembayaran secara manual dan mengirimkan konfirmasi.</span></div>
+        <div class="form-footer"><a class="text-link" href="{% url 'booking_detail' view.kwargs.booking_id %}">← Kembali ke detail</a><button class="button btn btn-danger button-dark" type="submit">Kirim Pembayaran <span>→</span></button></div>
+    </form>
+    <aside class="side-card payment-side"><p class="eyebrow">Instruksi pembayaran</p><h2>Transfer dengan tenang.</h2><p>Gunakan rekening resmi kami, lalu simpan bukti transfer untuk diunggah di halaman ini.</p><div class="bank-box"><span>Bank Nocturn Haven</span><strong>1234 5678 90</strong><small>a.n. PT Nocturn Haven Hospitality</small></div><div class="side-note"><strong>Butuh bantuan?</strong><span>Tim reservasi siap membantu</span></div></aside>
+</div>
+{% endblock %}
