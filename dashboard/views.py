@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
 
-from reservations.models import Booking, TemporaryRoom
+from reservations.models import Booking
+from rooms.models import Room
 
 
 class DashboardView(TemplateView):
@@ -8,7 +9,7 @@ class DashboardView(TemplateView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		rooms = list(TemporaryRoom.objects.all()[:3])
+		rooms = list(Room.objects.select_related('room_type').all()[:3])
 		bookings = Booking.objects.select_related('room').order_by('-created_at')
 
 		showcase_rooms = [
@@ -46,13 +47,13 @@ class DashboardView(TemplateView):
 
 		for index, room in enumerate(rooms):
 			showcase_rooms[index]['database_room'] = room
-			showcase_rooms[index]['price'] = f'{room.harga_per_malam:,.0f}'.replace(',', '.')
+			showcase_rooms[index]['price'] = f'{room.room_type.price_per_night:,.0f}'.replace(',', '.')
 
 		context.update({
 			'rooms': showcase_rooms,
 			'recent_bookings': bookings[:4],
-			'room_count': TemporaryRoom.objects.count(),
+			'room_count': Room.objects.count(),
 			'booking_count': Booking.objects.count(),
-			'paid_booking_count': Booking.objects.filter(status_pesanan='PAID').count(),
+			'paid_booking_count': Booking.objects.filter(status_pesanan='CONFIRMED').count(),
 		})
 		return context

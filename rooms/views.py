@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from reservations.models import TemporaryRoom
+from .models import Room
 
 
 class RoomListView(TemplateView):
@@ -38,13 +38,13 @@ class RoomListView(TemplateView):
 				'features': ['Jacuzzi Taman Privat', 'Layanan Makan di Villa 24 Jam', 'Antar-Jemput Bandara', 'Teras Kayu Jati'],
 			},
 		]
-		database_rooms = list(TemporaryRoom.objects.all()[:4])
+		database_rooms = list(Room.objects.select_related('room_type').all()[:4])
 		for index, room in enumerate(database_rooms):
 			room_defaults[index]['name'] = f'Kamar {room.nomor_kamar}'
-			room_defaults[index]['price'] = f'{room.harga_per_malam:,.0f}'.replace(',', '.')
+			room_defaults[index]['price'] = f'{room.room_type.price_per_night:,.0f}'.replace(',', '.')
 			room_defaults[index]['total'] = room_defaults[index]['price']
 		context['rooms'] = room_defaults
-		context['room_count'] = TemporaryRoom.objects.count() or len(room_defaults)
+		context['room_count'] = Room.objects.count() or len(room_defaults)
 		return context
 
 

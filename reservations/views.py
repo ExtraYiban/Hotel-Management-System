@@ -36,6 +36,7 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         booking = Booking.objects.get(pk=self.kwargs['booking_id'], user=self.request.user)
         form.instance.booking = booking
+        form.instance.amount = booking.total_biaya_akhir
         return super().form_valid(form)
 
     def get_success_url(self):

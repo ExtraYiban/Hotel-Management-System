@@ -9,8 +9,8 @@ class BookingForm(forms.ModelForm):
         fields = ['room', 'tanggal_check_in', 'tanggal_check_out', 'jumlah_tamu', 'voucher']
         widgets = {
             'room': forms.Select(attrs={'class': 'form-select'}),
-            'tanggal_check_in': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'tanggal_check_out': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'tanggal_check_in': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'tanggal_check_out': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'jumlah_tamu': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'voucher': forms.Select(attrs={'class': 'form-select'}),
         }
