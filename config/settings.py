@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'reservations',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Media files (Untuk simpan foto Bukti Transfer)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
