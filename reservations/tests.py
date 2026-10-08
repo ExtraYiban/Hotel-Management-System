@@ -166,6 +166,23 @@ class BookingHistoryTest(TestCase):
         self.assertContains(resp, f'NH-{self.booking.pk:04d}')
         self.assertContains(resp, self.booking.room.room_number)
 
+    def test_list_hides_other_guests_bookings(self):
+        other_user = User.objects.create_user('other-history-guest', password='p')
+        other_room = Room.objects.order_by('room_number').last()
+        other_booking = Booking.objects.create(
+            user=other_user,
+            room=other_room,
+            tanggal_check_in=date(2026, 12, 1),
+            tanggal_check_out=date(2026, 12, 2),
+            jumlah_tamu=1,
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get('/reservations/riwayat/')
+
+        self.assertContains(response, f'NH-{self.booking.pk:04d}')
+        self.assertNotContains(response, f'NH-{other_booking.pk:04d}')
+
     def test_latest_redirects_to_detail(self):
         self.client.force_login(self.user)
         resp = self.client.get('/reservations/terakhir/')
