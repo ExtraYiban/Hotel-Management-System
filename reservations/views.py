@@ -26,6 +26,8 @@ class BookingDetailView(LoginRequiredMixin, DetailView):
     template_name = 'reservations/booking_detail.html' # Mutia bakal bikin UI-nya di sini
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return Booking.objects.select_related('room', 'payment')
         return Booking.objects.filter(user=self.request.user).select_related('room', 'payment')
 
 class BookingListView(LoginRequiredMixin, ListView):

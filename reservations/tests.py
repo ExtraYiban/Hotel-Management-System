@@ -178,6 +178,36 @@ class BookingHistoryTest(TestCase):
         self.assertRedirects(resp, '/reservations/riwayat/')
 
 
+class BookingDetailAccessTest(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user('owner', password='p')
+        self.other_guest = User.objects.create_user('other', password='p')
+        self.admin = User.objects.create_superuser('detail-admin', 'admin@test.com', 'p')
+        room = Room.objects.order_by('room_number').first()
+        self.booking = Booking.objects.create(
+            user=self.owner,
+            room=room,
+            tanggal_check_in=date(2026, 11, 1),
+            tanggal_check_out=date(2026, 11, 2),
+            jumlah_tamu=1,
+        )
+
+    def test_guest_cannot_view_another_guests_booking(self):
+        self.client.force_login(self.other_guest)
+
+        response = self.client.get(f'/reservations/{self.booking.pk}/')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_can_view_any_booking_detail(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(f'/reservations/{self.booking.pk}/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'NH-{self.booking.pk:04d}')
+
+
 class BookingAdminPropagationTest(TestCase):
     def test_confirm_in_admin_verifies_payment(self):
         from django.contrib.admin.sites import AdminSite
