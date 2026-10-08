@@ -3,6 +3,7 @@ body { margin: 0; background: #f7f8fc; color: #18243b; font-family: "DM Sans", A
 a { text-decoration: none; }
 .site-header { min-height: 72px; padding: 15px 5%; background: white; border-bottom: 1px solid #dddddd; display: flex; align-items: center; gap: 30px; }
 .brand { display: flex; align-items: center; gap: 8px; color: #710000; letter-spacing: 1px; }
+.brand-logo { display: block; width: 52px; height: 62px; object-fit: contain; }
 .brand-mark { font-family: "Playfair Display", Georgia, serif; font-size: 36px; font-style: italic; }
 .brand strong, .brand small { display: block; }
 .brand strong { font-size: 14px; }.brand small { font-size: 9px; letter-spacing: 3px; }

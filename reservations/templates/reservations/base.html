@@ -14,7 +14,7 @@
 </head>
 <body class="reservation-page">
     <header class="site-header">
-        <a class="brand" href="{% url 'home' %}"><span class="brand-mark">N</span><span><strong>NOCTURN</strong><small>HAVEN</small></span></a>
+        <a class="brand" href="{% url 'home' %}"><img class="brand-logo" src="{% static 'dashboard/images/logo.svg' %}" alt="Nocturn Haven"></a>
         <nav class="main-nav" aria-label="Navigasi utama"><a href="{% url 'home' %}">Home</a><a class="active" href="{% url 'room_list' %}">Room &amp; Suites</a><a href="{% url 'home' %}#facilities">Facilities</a><a href="{% url 'home' %}#offers">Offers</a></nav>
         {% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="button btn btn-danger button-dark" type="submit">Keluar</button></form>{% else %}<a class="button btn btn-danger button-dark" href="{% url 'login' %}">Masuk</a>{% endif %}
     </header>
