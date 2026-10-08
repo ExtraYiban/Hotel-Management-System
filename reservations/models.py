@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from rooms.models import Room
 
 #Ini sementara aja karena room blm selesai
@@ -58,6 +59,7 @@ class Booking(BaseTransaction):
     pajak_dan_layanan = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_biaya_akhir = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     status_pesanan = models.CharField(max_length=30, choices=STATUS_CHOICES, default='PENDING_PAYMENT', db_column='status')
+    checked_in_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'bookings'
@@ -101,6 +103,14 @@ class Booking(BaseTransaction):
             self.save()
             return True
         return False
+
+    def check_in(self):
+        if self.status_pesanan != 'CONFIRMED':
+            return False
+        self.status_pesanan = 'CHECKED_IN'
+        self.checked_in_at = timezone.now()
+        self.save(update_fields=['status_pesanan', 'checked_in_at', 'updated_at'])
+        return True
 
 #payment
 class Payment(BaseTransaction):

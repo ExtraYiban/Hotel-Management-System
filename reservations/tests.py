@@ -158,6 +158,32 @@ class PaymentVerificationFlowTest(TestCase):
         self.assertEqual(self.booking.status_pesanan, 'PENDING_PAYMENT')
 
 
+class BookingCheckInTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('checkin-guest', password='p')
+        room = Room.objects.order_by('room_number').first()
+        self.booking = Booking.objects.create(
+            user=self.user, room=room,
+            tanggal_check_in=date(2026, 12, 15), tanggal_check_out=date(2026, 12, 16),
+            jumlah_tamu=1, status_pesanan='CONFIRMED',
+        )
+
+    def test_confirmed_booking_can_check_in(self):
+        self.assertTrue(self.booking.check_in())
+
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'CHECKED_IN')
+        self.assertIsNotNone(self.booking.checked_in_at)
+
+    def test_unconfirmed_booking_cannot_check_in(self):
+        self.booking.status_pesanan = 'PENDING_PAYMENT'
+        self.booking.save()
+
+        self.assertFalse(self.booking.check_in())
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'PENDING_PAYMENT')
+
+
 class BookingHistoryTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('tamu', password='p')
