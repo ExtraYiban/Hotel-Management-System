@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'dashboard',
     'accounts',
     'rooms',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -137,3 +139,9 @@ MAILERS = {
 # Media files (Untuk simpan foto Bukti Transfer)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Gemini — isi via environment, JANGAN hardcode API key di sini
+# (GitHub push protection menolak push yang berisi secret).
+# PowerShell: $env:GEMINI_API_KEY="..."; $env:GEMINI_MODEL="gemini-3.8-flash"
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-3.8-flash')

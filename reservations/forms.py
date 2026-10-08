@@ -1,7 +1,8 @@
 #buat di styling ui nya sama mutia
 
 from django import forms
-from .models import Booking, Payment
+from rooms.models import Room
+from .models import Booking, Payment, PromoVoucher
 
 class BookingForm(forms.ModelForm):
     class Meta:
@@ -14,6 +15,14 @@ class BookingForm(forms.ModelForm):
             'jumlah_tamu': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'voucher': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['room'].queryset = Room.objects.select_related('room_type').order_by('room_number')
+        self.fields['room'].empty_label = '— Pilih kamar —'
+        self.fields['voucher'].queryset = PromoVoucher.objects.order_by('kode_voucher')
+        self.fields['voucher'].required = False
+        self.fields['voucher'].empty_label = '— Tanpa voucher —'
 
 class PaymentForm(forms.ModelForm):
     class Meta:
