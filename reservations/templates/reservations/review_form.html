@@ -1,0 +1,14 @@
+{% extends 'reservations/base.html' %}
+{% block title %}Berikan Review{% endblock %}
+{% block content %}
+<section class="page-intro"><div><h1>Bagikan pengalaman Anda</h1><p>Berikan penilaian untuk reservasi NH-{{ view.kwargs.booking_id|stringformat:'04d' }}.</p></div><span class="step-label">Review</span></section>
+<div class="reservation-layout">
+    <form class="form-card" method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+        <label class="field"><span>Rating (1-5)</span>{{ form.rating }}{% if form.rating.errors %}<small class="error-text">{{ form.rating.errors|striptags }}</small>{% endif %}</label>
+        <label class="field"><span>Komentar</span>{{ form.comment }}{% if form.comment.errors %}<small class="error-text">{{ form.comment.errors|striptags }}</small>{% endif %}</label>
+        <div class="form-footer"><a class="text-link" href="{% url 'booking_detail' view.kwargs.booking_id %}"><- Kembali ke detail</a><button class="button btn btn-danger button-dark" type="submit">Kirim Review</button></div>
+    </form>
+</div>
+{% endblock %}

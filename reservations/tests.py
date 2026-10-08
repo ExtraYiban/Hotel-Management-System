@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from rooms.models import Room
-from reservations.forms import BookingForm
-from reservations.models import Booking, Payment, PromoVoucher
+from reservations.forms import BookingForm, ReviewForm
+from reservations.models import Booking, Payment, PromoVoucher, Review
 
 
 class BookingFormSeedTest(TestCase):
@@ -350,3 +350,47 @@ class BookingAdminPropagationTest(TestCase):
         self.assertEqual(payment.status_pembayaran, 'VERIFIED')
         self.assertEqual(payment.verified_by, staff)
         self.assertIsNotNone(payment.verified_at)
+
+
+class ReviewFeatureTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('review-guest', password='p')
+        room = Room.objects.order_by('room_number').first()
+        self.booking = Booking.objects.create(
+            user=self.user, room=room,
+            tanggal_check_in=date(2026, 12, 25), tanggal_check_out=date(2026, 12, 26),
+            jumlah_tamu=1, status_pesanan='CHECKED_OUT',
+        )
+        self.client.force_login(self.user)
+
+    def test_guest_can_submit_review_after_checkout(self):
+        response = self.client.post(
+            f'/reservations/{self.booking.pk}/review/',
+            {'rating': 5, 'comment': 'Sangat nyaman.'},
+        )
+
+        self.assertRedirects(response, f'/reservations/{self.booking.pk}/')
+        review = Review.objects.get(booking=self.booking)
+        self.assertEqual(review.guest, self.user)
+        self.assertEqual(review.rating, 5)
+
+    def test_review_before_checkout_is_rejected(self):
+        self.booking.status_pesanan = 'CONFIRMED'
+        self.booking.save()
+
+        response = self.client.get(f'/reservations/{self.booking.pk}/review/')
+
+        self.assertRedirects(response, f'/reservations/{self.booking.pk}/')
+        self.assertFalse(Review.objects.filter(booking=self.booking).exists())
+
+    def test_duplicate_review_is_rejected(self):
+        Review.objects.create(booking=self.booking, guest=self.user, rating=4, comment='Baik.')
+
+        response = self.client.get(f'/reservations/{self.booking.pk}/review/')
+
+        self.assertRedirects(response, f'/reservations/{self.booking.pk}/')
+
+    def test_rating_must_be_between_one_and_five(self):
+        form = ReviewForm(data={'rating': 6, 'comment': 'Invalid'})
+
+        self.assertFalse(form.is_valid())

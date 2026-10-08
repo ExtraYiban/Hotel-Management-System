@@ -3,7 +3,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from rooms.models import Room
-from .models import Booking, Payment, PromoVoucher
+from .models import Booking, Payment, PromoVoucher, Review
 
 class BookingForm(forms.ModelForm):
     class Meta:
@@ -51,4 +51,14 @@ class PaymentForm(forms.ModelForm):
         widgets = {
             'metode_pembayaran': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contoh: Transfer Bank'}),
             'bukti_transfer_url': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 5}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
         }

@@ -4,8 +4,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, RedirectView
 from django.urls import reverse, reverse_lazy
-from .models import Booking, Payment
-from .forms import BookingForm, PaymentForm
+from .models import Booking, Payment, Review
+from .forms import BookingForm, PaymentForm, ReviewForm
 
 # Mewarisi CreateView dari Django untuk OOP yang lebih rapi
 class BookingCreateView(LoginRequiredMixin, CreateView):
@@ -86,3 +86,27 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('booking_detail', kwargs={'pk': self.object.booking.pk})
+
+
+class ReviewCreateView(LoginRequiredMixin, CreateView):
+    model = Review
+    form_class = ReviewForm
+    template_name = 'reservations/review_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.booking = get_object_or_404(Booking, pk=kwargs['booking_id'], user=request.user)
+        if self.booking.status_pesanan != 'CHECKED_OUT':
+            messages.error(request, 'Review hanya dapat diberikan setelah check-out.')
+            return redirect('booking_detail', pk=self.booking.pk)
+        if Review.objects.filter(booking=self.booking).exists():
+            messages.error(request, 'Review untuk booking ini sudah pernah diberikan.')
+            return redirect('booking_detail', pk=self.booking.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.booking = self.booking
+        form.instance.guest = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('booking_detail', kwargs={'pk': self.booking.pk})
