@@ -22,6 +22,9 @@ class AccountLoginForm(AuthenticationForm):
             if self.user_cache is None:
                 raise self.get_invalid_login_error()
             self.confirm_login_allowed(self.user_cache)
+            profile = getattr(self.user_cache, 'guest_profile', None)
+            if profile and profile.status != GuestProfile.STATUS_CHOICES[0][0]:
+                raise forms.ValidationError('Akun Anda sedang dinonaktifkan.', code='inactive')
         return self.cleaned_data
 
 

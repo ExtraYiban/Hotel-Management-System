@@ -11,6 +11,11 @@ class AccountLoginView(LoginView):
 	authentication_form = AccountLoginForm
 	redirect_authenticated_user = True
 
+	def get_success_url(self):
+		if self.request.user.is_staff or getattr(getattr(self.request.user, 'guest_profile', None), 'role', None) == 'ADMIN':
+			return reverse_lazy('admin:index')
+		return reverse_lazy('home')
+
 
 class AccountLogoutView(LogoutView):
 	pass

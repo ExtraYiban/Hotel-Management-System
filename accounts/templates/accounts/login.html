@@ -2,6 +2,6 @@
 {% block title %}Masuk{% endblock %}
 {% block content %}
 <p class="eyebrow">Selamat datang kembali <span></span></p><h1>Masuk ke Nocturn Haven</h1><p class="auth-subtitle">Kelola reservasi dan nikmati perjalanan yang terasa lebih personal.</p>
-<form method="post" class="auth-form">{% csrf_token %}{% if form.non_field_errors %}<div class="auth-error">Email, password, atau status akun belum sesuai.</div>{% endif %}<label>Email{{ form.username }}</label><label>Password{{ form.password }}</label><input type="hidden" name="next" value="{{ next }}"><button class="button btn btn-danger button-dark" type="submit">Masuk <span>→</span></button></form>
+<form method="post" class="auth-form">{% csrf_token %}{% if form.non_field_errors %}<div class="auth-error">{{ form.non_field_errors|striptags }}</div>{% endif %}<label>Email{{ form.username }}</label><label>Password{{ form.password }}</label><input type="hidden" name="next" value="{{ next }}"><button class="button btn btn-danger button-dark" type="submit">Masuk <span>→</span></button></form>
 <p class="auth-switch">Belum memiliki akun? <a href="{% url 'register' %}">Daftar sekarang</a></p>
 {% endblock %}

@@ -18,3 +18,20 @@ class ManagedUserAdmin(UserAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, ManagedUserAdmin)
+
+
+@admin.register(GuestProfile)
+class GuestProfileAdmin(admin.ModelAdmin):
+	list_display = ('user', 'email', 'phone_number', 'role', 'status', 'created_at')
+	list_filter = ('role', 'status')
+	list_editable = ('role', 'status')
+	search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'phone_number')
+
+	@admin.display(description='Email')
+	def email(self, obj):
+		return obj.user.email
+
+	def save_model(self, request, obj, form, change):
+		obj.user.is_active = obj.status == 'ACTIVE'
+		obj.user.save(update_fields=['is_active'])
+		super().save_model(request, obj, form, change)
