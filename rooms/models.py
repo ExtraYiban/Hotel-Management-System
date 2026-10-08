@@ -1,11 +1,12 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
 class RoomType(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	description = models.TextField(blank=True)
-	capacity = models.PositiveIntegerField()
-	price_per_night = models.DecimalField(max_digits=12, decimal_places=2)
+	capacity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+	price_per_night = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
 
 	class Meta:
 		db_table = 'room_types'
