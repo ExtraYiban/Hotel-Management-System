@@ -1,6 +1,7 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView
 
-from reservations.models import Booking
+from reservations.models import Booking, Payment
 from rooms.models import Room
 
 
@@ -55,5 +56,26 @@ class DashboardView(TemplateView):
 			'room_count': Room.objects.count(),
 			'booking_count': Booking.objects.count(),
 			'paid_booking_count': Booking.objects.filter(status_pesanan='CONFIRMED').count(),
+		})
+		return context
+
+
+class ReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+	template_name = 'dashboard/report.html'
+
+	def test_func(self):
+		return self.request.user.is_staff
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context.update({
+			'total_bookings': Booking.objects.count(),
+			'confirmed_bookings': Booking.objects.filter(status_pesanan='CONFIRMED').count(),
+			'checked_in_bookings': Booking.objects.filter(status_pesanan='CHECKED_IN').count(),
+			'checked_out_bookings': Booking.objects.filter(status_pesanan='CHECKED_OUT').count(),
+			'verified_payments': Payment.objects.filter(status_pembayaran='VERIFIED').count(),
+			'clean_rooms': Room.objects.filter(status='CLEAN').count(),
+			'dirty_rooms': Room.objects.filter(status='DIRTY').count(),
+			'maintenance_rooms': Room.objects.filter(status='MAINTENANCE').count(),
 		})
 		return context

@@ -37,6 +37,7 @@ urlpatterns = [
     path('health/', health_check, name='health'),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('rooms/', RoomListView.as_view(), name='room_list'),
     path('rooms/<int:room_id>/', RoomDetailView.as_view(), name='room_detail'),
     path('reservations/', include('reservations.urls')),
