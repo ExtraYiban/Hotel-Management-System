@@ -40,7 +40,7 @@ class RoomListView(TemplateView):
 		]
 		database_rooms = list(Room.objects.select_related('room_type').all()[:4])
 		for index, room in enumerate(database_rooms):
-			room_defaults[index]['name'] = f'Kamar {room.nomor_kamar}'
+			room_defaults[index]['name'] = f'Kamar {room.room_number}'
 			room_defaults[index]['price'] = f'{room.room_type.price_per_night:,.0f}'.replace(',', '.')
 			room_defaults[index]['total'] = room_defaults[index]['price']
 		context['rooms'] = room_defaults
