@@ -184,6 +184,34 @@ class BookingCheckInTest(TestCase):
         self.assertEqual(self.booking.status_pesanan, 'PENDING_PAYMENT')
 
 
+class BookingCheckOutTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('checkout-guest', password='p')
+        self.room = Room.objects.order_by('room_number').first()
+        self.booking = Booking.objects.create(
+            user=self.user, room=self.room,
+            tanggal_check_in=date(2026, 12, 20), tanggal_check_out=date(2026, 12, 21),
+            jumlah_tamu=1, status_pesanan='CHECKED_IN',
+        )
+
+    def test_checked_in_booking_can_check_out_and_dirties_room(self):
+        self.assertTrue(self.booking.check_out())
+
+        self.booking.refresh_from_db()
+        self.room.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'CHECKED_OUT')
+        self.assertIsNotNone(self.booking.checked_out_at)
+        self.assertEqual(self.room.status, 'DIRTY')
+
+    def test_booking_not_checked_in_cannot_check_out(self):
+        self.booking.status_pesanan = 'CONFIRMED'
+        self.booking.save()
+
+        self.assertFalse(self.booking.check_out())
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'CONFIRMED')
+
+
 class BookingHistoryTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('tamu', password='p')

@@ -13,7 +13,7 @@ class BookingAdmin(admin.ModelAdmin):
 	list_filter = ('status_pesanan',)
 	search_fields = ('user__username', 'room__room_number')
 	ordering = ('-created_at',)
-	actions = ('check_in_bookings',)
+	actions = ('check_in_bookings', 'check_out_bookings')
 
 	@admin.action(description='Check-in booking terkonfirmasi')
 	def check_in_bookings(self, request, queryset):
@@ -22,6 +22,14 @@ class BookingAdmin(admin.ModelAdmin):
 			if booking.check_in():
 				checked_in += 1
 		self.message_user(request, f'{checked_in} booking berhasil check-in.')
+
+	@admin.action(description='Check-out booking yang sedang menginap')
+	def check_out_bookings(self, request, queryset):
+		checked_out = 0
+		for booking in queryset:
+			if booking.check_out():
+				checked_out += 1
+		self.message_user(request, f'{checked_out} booking berhasil check-out.')
 
 	def save_model(self, request, obj, form, change):
 		"""Mengubah status booking menjadi Confirmed juga memverifikasi
