@@ -69,6 +69,13 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
     form_class = PaymentForm
     template_name = 'reservations/payment_form.html'
 
+    def post(self, request, *args, **kwargs):
+        booking = get_object_or_404(Booking, pk=kwargs['booking_id'], user=request.user)
+        if booking.status_pesanan != 'PENDING_PAYMENT' or Payment.objects.filter(booking=booking).exists():
+            messages.error(request, 'Booking ini tidak dapat menerima pembayaran baru.')
+            return redirect('booking_detail', pk=booking.pk)
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
         booking = Booking.objects.get(pk=self.kwargs['booking_id'], user=self.request.user)
         form.instance.booking = booking

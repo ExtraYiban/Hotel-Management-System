@@ -123,6 +123,20 @@ class PaymentVerificationFlowTest(TestCase):
         self.assertEqual(payment.status_pembayaran, 'PENDING_VERIFICATION')
         self.assertEqual(payment.amount, self.booking.total_biaya_akhir)
 
+    def test_second_payment_submission_is_rejected(self):
+        Payment.objects.create(
+            booking=self.booking, amount=self.booking.total_biaya_akhir,
+            metode_pembayaran='Transfer Bank', status_pembayaran='PENDING_VERIFICATION',
+        )
+
+        response = self.client.post(
+            f'/reservations/{self.booking.pk}/bayar/',
+            {'metode_pembayaran': 'Transfer Bank'},
+        )
+
+        self.assertRedirects(response, f'/reservations/{self.booking.pk}/')
+        self.assertEqual(Payment.objects.filter(booking=self.booking).count(), 1)
+
     def test_approve_confirms_booking(self):
         payment = Payment.objects.create(
             booking=self.booking, amount=self.booking.total_biaya_akhir,
