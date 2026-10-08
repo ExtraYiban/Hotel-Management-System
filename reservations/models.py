@@ -66,6 +66,19 @@ class Booking(BaseTransaction):
             models.CheckConstraint(condition=models.Q(jumlah_tamu__gt=0), name='booking_guest_count_positive'),
         ]
 
+    @classmethod
+    def available_rooms(cls, check_in, check_out):
+        if check_out <= check_in:
+            raise ValueError('Tanggal check-out harus setelah check-in.')
+
+        blocking_statuses = ['PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN']
+        blocked_room_ids = cls.objects.filter(
+            status_pesanan__in=blocking_statuses,
+            tanggal_check_in__lt=check_out,
+            tanggal_check_out__gt=check_in,
+        ).values('room_id')
+        return Room.objects.filter(status='CLEAN').exclude(pk__in=blocked_room_ids)
+
     def hitung_total_biaya(self):
         """Abstraksi kalkulasi biaya"""
         durasi = (self.tanggal_check_out - self.tanggal_check_in).days

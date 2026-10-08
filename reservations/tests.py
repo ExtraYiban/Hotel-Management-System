@@ -27,6 +27,30 @@ class BookingFormSeedTest(TestCase):
         self.assertContains(resp, first_room.room_number)
         self.assertContains(resp, PromoVoucher.objects.order_by('kode_voucher').first().kode_voucher)
 
+    def test_available_rooms_excludes_overlap_and_non_clean_room(self):
+        from datetime import timedelta
+
+        user = User.objects.create_user('booked-guest', password='p')
+        rooms = list(Room.objects.order_by('room_number')[:3])
+        rooms[1].status = 'MAINTENANCE'
+        rooms[1].save()
+        start = date(2026, 10, 9)
+        end = start + timedelta(days=2)
+        Booking.objects.create(
+            user=user,
+            room=rooms[0],
+            tanggal_check_in=start,
+            tanggal_check_out=end,
+            jumlah_tamu=1,
+            status_pesanan='CONFIRMED',
+        )
+
+        available = set(Booking.available_rooms(start, end).values_list('pk', flat=True))
+
+        self.assertNotIn(rooms[0].pk, available)
+        self.assertNotIn(rooms[1].pk, available)
+        self.assertIn(rooms[2].pk, available)
+
 
 class PaymentVerificationFlowTest(TestCase):
     def setUp(self):

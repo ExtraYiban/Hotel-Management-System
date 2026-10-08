@@ -1,5 +1,7 @@
+from django.utils.dateparse import parse_date
 from django.views.generic import TemplateView
 
+from reservations.models import Booking
 from .models import Room
 
 
@@ -38,13 +40,31 @@ class RoomListView(TemplateView):
 				'features': ['Jacuzzi Taman Privat', 'Layanan Makan di Villa 24 Jam', 'Antar-Jemput Bandara', 'Teras Kayu Jati'],
 			},
 		]
+		check_in_value = self.request.GET.get('check_in', '')
+		check_out_value = self.request.GET.get('check_out', '')
+		check_in = parse_date(check_in_value)
+		check_out = parse_date(check_out_value)
+		availability_checked = bool(check_in and check_out)
+		availability_error = ''
+		available_room_ids = None
+		if availability_checked:
+			if check_out <= check_in:
+				availability_error = 'Tanggal check-out harus setelah check-in.'
+			else:
+				available_room_ids = set(Booking.available_rooms(check_in, check_out).values_list('pk', flat=True))
 		database_rooms = list(Room.objects.select_related('room_type').all()[:4])
 		for index, room in enumerate(database_rooms):
 			room_defaults[index]['name'] = f'Kamar {room.room_number}'
 			room_defaults[index]['price'] = f'{room.room_type.price_per_night:,.0f}'.replace(',', '.')
 			room_defaults[index]['total'] = room_defaults[index]['price']
-		context['rooms'] = room_defaults
-		context['room_count'] = Room.objects.count() or len(room_defaults)
+			room_defaults[index]['is_available'] = available_room_ids is None or room.pk in available_room_ids
+		rooms = [room for room in room_defaults if room.get('is_available', True)]
+		context['rooms'] = rooms if availability_checked and not availability_error else room_defaults
+		context['room_count'] = len(context['rooms']) if availability_checked and not availability_error else Room.objects.count() or len(room_defaults)
+		context['availability_checked'] = availability_checked
+		context['availability_error'] = availability_error
+		context['check_in'] = check_in_value
+		context['check_out'] = check_out_value
 		return context
 
 
