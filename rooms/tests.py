@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
+from django.db import IntegrityError
 from django.test import TestCase
 
 from .models import Room, RoomType
@@ -47,3 +48,27 @@ class RoomTypeFeatureTests(TestCase):
 
 		with self.assertRaises(ProtectedError):
 			room_type.delete()
+
+
+class RoomFeatureTests(TestCase):
+	def setUp(self):
+		self.room_type = RoomType.objects.create(
+			name='Suite', capacity=4, price_per_night=Decimal('2500000.00')
+		)
+
+	def test_room_unit_can_be_created_and_updated(self):
+		from .models import Room
+
+		room = Room.objects.create(room_type=self.room_type, room_number='999', status='CLEAN')
+		room.status = 'MAINTENANCE'
+		room.save()
+
+		room.refresh_from_db()
+		self.assertEqual(room.status, 'MAINTENANCE')
+
+	def test_duplicate_room_number_is_rejected(self):
+		from .models import Room
+
+		Room.objects.create(room_type=self.room_type, room_number='999')
+		with self.assertRaises(IntegrityError):
+			Room.objects.create(room_type=self.room_type, room_number='999')
