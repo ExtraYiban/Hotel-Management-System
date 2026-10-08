@@ -51,6 +51,51 @@ class BookingFormSeedTest(TestCase):
         self.assertNotIn(rooms[1].pk, available)
         self.assertIn(rooms[2].pk, available)
 
+    def test_booking_form_rejects_invalid_dates(self):
+        room = Room.objects.order_by('room_number').first()
+        form = BookingForm(data={
+            'room': room.pk,
+            'tanggal_check_in': '2026-10-12',
+            'tanggal_check_out': '2026-10-11',
+            'jumlah_tamu': 1,
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Tanggal check-out harus setelah check-in.', form.non_field_errors())
+
+    def test_booking_form_rejects_capacity_overflow(self):
+        room = Room.objects.order_by('room_number').first()
+        form = BookingForm(data={
+            'room': room.pk,
+            'tanggal_check_in': '2026-10-12',
+            'tanggal_check_out': '2026-10-13',
+            'jumlah_tamu': room.room_type.capacity + 1,
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Kapasitas kamar maksimal', form.non_field_errors()[0])
+
+    def test_booking_form_rejects_overlapping_room(self):
+        user = User.objects.create_user('overlap-guest', password='p')
+        room = Room.objects.order_by('room_number').first()
+        Booking.objects.create(
+            user=user,
+            room=room,
+            tanggal_check_in=date(2026, 10, 12),
+            tanggal_check_out=date(2026, 10, 14),
+            jumlah_tamu=1,
+            status_pesanan='CONFIRMED',
+        )
+        form = BookingForm(data={
+            'room': room.pk,
+            'tanggal_check_in': '2026-10-13',
+            'tanggal_check_out': '2026-10-15',
+            'jumlah_tamu': 1,
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Kamar tidak tersedia pada periode tersebut.', form.non_field_errors())
+
 
 class PaymentVerificationFlowTest(TestCase):
     def setUp(self):
