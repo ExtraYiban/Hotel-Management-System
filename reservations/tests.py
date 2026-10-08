@@ -225,6 +225,34 @@ class BookingDetailAccessTest(TestCase):
         self.assertContains(response, f'NH-{self.booking.pk:04d}')
 
 
+class BookingCancellationTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('cancel-guest', password='p')
+        room = Room.objects.order_by('room_number').first()
+        self.booking = Booking.objects.create(
+            user=self.user, room=room,
+            tanggal_check_in=date(2026, 12, 10), tanggal_check_out=date(2026, 12, 11),
+            jumlah_tamu=1,
+        )
+        self.client.force_login(self.user)
+
+    def test_guest_can_cancel_pending_booking(self):
+        response = self.client.post(f'/reservations/{self.booking.pk}/batal/')
+
+        self.assertRedirects(response, f'/reservations/{self.booking.pk}/')
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'CANCELLED')
+
+    def test_checked_in_booking_cannot_be_cancelled(self):
+        self.booking.status_pesanan = 'CHECKED_IN'
+        self.booking.save()
+
+        self.client.post(f'/reservations/{self.booking.pk}/batal/')
+
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status_pesanan, 'CHECKED_IN')
+
+
 class BookingAdminPropagationTest(TestCase):
     def test_confirm_in_admin_verifies_payment(self):
         from django.contrib.admin.sites import AdminSite

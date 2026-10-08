@@ -1,4 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, RedirectView
 from django.urls import reverse, reverse_lazy
 from .models import Booking, Payment
@@ -50,6 +53,16 @@ class BookingLatestView(LoginRequiredMixin, RedirectView):
         if latest is None:
             return reverse('booking_list')
         return reverse('booking_detail', kwargs={'pk': latest.pk})
+
+
+class BookingCancelView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        booking = get_object_or_404(Booking, pk=pk, user=request.user)
+        if booking.batalkan_pesanan():
+            messages.success(request, 'Reservasi berhasil dibatalkan.')
+        else:
+            messages.error(request, 'Reservasi ini sudah tidak dapat dibatalkan.')
+        return redirect('booking_detail', pk=booking.pk)
 
 class PaymentCreateView(LoginRequiredMixin, CreateView):
     model = Payment
