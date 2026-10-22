@@ -10,6 +10,11 @@
     <link rel="stylesheet" href="{% static 'dashboard/css/home.css' %}">
     <link rel="stylesheet" href="{% static 'rooms/css/room-list.css' %}">
     <link rel="stylesheet" href="{% static 'rooms/css/room-interactions.css' %}">
+    <style>
+        .availability-day { display:inline-flex; flex-direction:column; align-items:center; padding:6px 10px; border-radius:8px; font-size:.8rem; min-width:56px; }
+        .availability-day.available { background:#e8f5e9; color:#2e7d32; }
+        .availability-day.unavailable { background:#ffebee; color:#c62828; }
+    </style>
 </head>
 <body class="room-detail-page">
 <header class="site-header">
@@ -30,7 +35,7 @@
             <h2>Ketersediaan 14 hari ke depan</h2>
             <div class="availability-calendar" style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0">
                 {% for day in calendar %}
-                <span title="{{ day.note|default:'Tersedia' }}" style="display:inline-flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:8px;font-size:.8rem;min-width:56px;{% if day.available %}background:#e8f5e9;color:#2e7d32{% else %}background:#ffebee;color:#c62828{% endif %}">
+                <span title="{{ day.note|default:'Tersedia' }}" class="availability-day {% if day.available %}available{% else %}unavailable{% endif %}">
                     <small>{{ day.date|date:'d M' }}</small>
                     {% if day.available %}✓{% else %}✗{% endif %}
                 </span>
